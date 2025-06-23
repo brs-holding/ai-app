@@ -1,3 +1,3 @@
-import { anthropic } from "@ai-sdk/anthropic";
+import { openRouterClaude } from "./openrouter";
 
-export const ANTHROPIC_MODEL = anthropic("claude-3-7-sonnet-20250219");
+export const ANTHROPIC_MODEL = openRouterClaude("anthropic/claude-3-opus-20240229");

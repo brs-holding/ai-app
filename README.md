@@ -1,6 +1,11 @@
-# Adorable
+# AI APP
 
-Open-source version of **Lovable** - an AI agent that can make websites and apps through a chat interface.
+This is a fork of [Adorable](https://github.com/freestyle-sh/adorable) - an AI agent that can make websites and apps through a chat interface.
+
+## Key Changes in this Fork
+
+- Uses OpenRouter.ai instead of direct Anthropic API access
+- Simplified setup with updated environment variables
 
 ## Features
 
@@ -14,78 +19,93 @@ Open-source version of **Lovable** - an AI agent that can make websites and apps
 ### Prerequisites
 
 - Node.js
-- PostgreSQL database ([Neon](https://neon.tech) is easy and has a good free tier)
-- Anthropic API key
+- PostgreSQL database (Neon is easy and has a good free tier)
+- OpenRouter.ai API key
 - Freestyle API key
 
 ### Installation
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/freestyle-sh/adorable
-   cd adorable
-   ```
+```bash
+git clone https://github.com/brs-holding/ai-app.git
+cd ai-app
+```
 
 2. Install dependencies:
 
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
-3. Get a Freestyle API key
+3. Set up environment variables:
+   
+Create a `.env` file in the root directory with the following variables:
 
-   Head to [our API keys page](https://admin.freestyle.sh/dashboard/api-tokens) to get yours. We're totally free to use right now!
+```
+# Database
+# Format: postgres://username:password@hostname/database?sslmode=require
+DATABASE_URL=postgres://username:password@hostname/database?sslmode=require
 
-4. Set up environment variables:
-   Create a `.env` file in the root directory with the following variables:
+# OpenRouter API (instead of Anthropic)
+OPENROUTER_API_KEY=your_openrouter_api_key
 
-   ```
-   # Database
-   DATABASE_URL=postgresql://username:password@localhost:5432/adorable
+# Freestyle API
+FREESTYLE_API_KEY=your_freestyle_api_key
 
-   # Anthropic API
-   ANTHROPIC_API_KEY=your_anthropic_api_key
+# Stack Auth (already configured)
+NEXT_PUBLIC_STACK_PROJECT_ID=05ca6f77-8b32-4a85-842e-202292205cb7
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=pck_480ezqt381a2vw2tratqesdggfrjk6zy2tkkc0ts9n0tr
+STACK_SECRET_SERVER_KEY=ssk_53efkpvpcfm79sddka91k784kjb617380zh488crj8648
 
-   # Freestyle API
-   FREESTYLE_API_KEY=your_freestyle_api_key
-   ```
+# Preview Domain (optional)
+# PREVIEW_DOMAIN=your-domain.app
+```
 
-5. Initialize the database:
+4. Set up your database:
+
+   a. Create a PostgreSQL database. The easiest option is to use [Neon](https://neon.tech/):
+      - Sign up for a free account at https://neon.tech/
+      - Create a new project
+      - Create a new database named "adorable"
+      - Get your connection string from the Neon dashboard
+      - Update the DATABASE_URL in your .env file with the connection string
+
+   b. Initialize the database schema:
 
    ```bash
    npx drizzle-kit push
    ```
 
-6. Set up [Stack Auth](https://stack-auth.com)
+5. Set up Stack Auth (optional):
 
-Go to the [Stack Auth dashboard](https://app.stack-auth.com) and create a new application. In Configuration > Domains, enable `Allow all localhost callbacks for development` to be able to sign in locally.
+Go to the [Stack Auth dashboard](https://app.stackframe.co/) and create a new application.
+In Configuration > Domains, enable "Allow all localhost callbacks for development" to be able to sign in locally.
 
-You'll need to add the following environment variables to your `.env` file:
+Add the following environment variables to your `.env` file:
 
-```env
+```
 NEXT_PUBLIC_STACK_PROJECT_ID=<your-project-id>
 NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=<your-publishable-client-key>
 STACK_SECRET_SERVER_KEY=<your-secret-server-key>
 ```
 
-7. Add a Preview Domain (optional)
+6. Run the development server:
 
-Go to the [Freestyle dashboard](https://admin.freestyle.sh/dashboard/domains) and verify a new domain. Then follow the [DNS Instructions](https://docs.freestyle.sh/Getting-Started/deploy-to-custom-domain#all-subdomains-of-a-domain) to point your domain to Freestyle.
-
-Finally, add the following environment variable to your `.env` file:
-
-```env
-PREVIEW_DOMAIN=<your-domain> # formatted like adorable.app
+```bash
+npm run dev
 ```
 
-8. Run the development server:
+7. Open http://localhost:3000 in your browser.
 
-   ```bash
-   npm run dev
-   ```
+## Using OpenRouter.ai
 
-9. Open [http://localhost:3000](http://localhost:3000) in your browser.
+This fork uses OpenRouter.ai instead of directly connecting to Anthropic. OpenRouter allows you to access various models, including Claude, through a single API.
+
+To get an OpenRouter API key:
+1. Sign up at [OpenRouter.ai](https://openrouter.ai/)
+2. Create an API key
+3. Add it to your `.env` file as `OPENROUTER_API_KEY`
 
 ## Deployment
 
@@ -101,3 +121,7 @@ Or use the included deployment script:
 ```bash
 ./deploy.sh
 ```
+
+## Credits
+
+This project is based on [Adorable](https://github.com/freestyle-sh/adorable) by Freestyle.
