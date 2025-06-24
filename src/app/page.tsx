@@ -18,6 +18,8 @@ import { UserButton } from "@stackframe/stack";
 import { UserApps } from "@/components/user-apps";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import CreditTracker from "@/components/CreditTracker";
+
 const queryClient = new QueryClient();
 
 export default function Home() {
@@ -129,8 +131,17 @@ export default function Home() {
               width={36}
               height={36}
             />
-            <div className="flex items-center gap-2 flex-1 sm:w-80 justify-end">
+            <div className="flex items-center gap-2 flex-1 sm:w-80 justify-end ">
               <UserButton />
+              <CreditTracker />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/pricing")}
+                className="text-xs"
+              >
+                Upgrade
+              </Button>
             </div>
           </div>
 

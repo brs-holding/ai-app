@@ -6,6 +6,9 @@ import { builderAgent } from "@/mastra/agents/builder";
 import { deleteStream, getStream, setStream } from "@/lib/streams";
 import { CoreMessage } from "@mastra/core";
 
+import { getUser } from "@/auth/stack-auth";
+import { openRouterClaude } from "@/lib/openrouter";
+
 // "fix" mastra mcp bug
 import { EventEmitter } from "events";
 
@@ -57,68 +60,50 @@ export async function POST(req: Request) {
   const rootStream = new TransformStream();
 
   let fixCount = 0;
-  async function runAgent(prompt: Parameters<typeof builderAgent.stream>[0]) {
-    const stream = await builderAgent.stream(prompt, {
-      threadId: appId,
-      resourceId: appId,
-      maxSteps: 100,
-      maxRetries: 0,
-      maxTokens: 64000,
 
-      // experimental_continueSteps: true,
-      toolsets,
-      onError: async (error) => {
-        await mcp.disconnect();
-        console.error("Error:", error);
-      },
-      onFinish: async (res) => {
-        deleteStream(appId!);
-        console.log("Finished with reason:", res.finishReason);
+  async function runAgent(prompt: any) {
+    // NEW: get userId
+    const { userId } = await getUser();
 
-        if (res.finishReason === "tool-calls" && fixCount < 10) {
-          fixCount++;
-          runAgent([
-            {
-              role: "user",
-              content: "continue",
-            },
-          ]);
+    // NEW: normalize prompt to string
+    let finalPrompt: string = "";
 
-          return;
-        }
+    if (typeof prompt === "string") {
+      finalPrompt = prompt;
+    } else if (Array.isArray(prompt)) {
+      finalPrompt = prompt.map((p: any) => {
+        if (p.type === "text") return p.text;
+        if (p.content) return p.content;
+        return "";
+      }).join("\n");
+    } else {
+      finalPrompt = "";
+    }
 
-        const pageRes = await fetch(ephemeralUrl);
+    try {
+      // NEW: call OpenRouter Claude
+      const result = await openRouterClaude().generateContent(finalPrompt, userId);
 
-        if (!pageRes.ok && fixCount < 10) {
-          fixCount++;
-          console.log("the page errored");
-          runAgent([
-            {
-              role: "user",
-              content: "The page returned 500. Please fix it.",
-            },
-          ]);
-          return;
-        }
+      // stream result into the rootStream, so your existing logic works the same
+      const writer = rootStream.writable.getWriter();
 
-        if (fixCount == 10) {
-          console.log("reached max fix count, will not retry anymore");
-        } else {
-          console.log("no detected errors. ending stream");
-        }
+      writer.write(new TextEncoder().encode(result.content));
+      writer.close();
 
-        await mcp.disconnect();
-        // todo: better solution
-        await rootStream.writable.abort();
-        console.log("Stream ended");
-      },
-      toolCallStreaming: true,
-    });
+      console.log("Stream ended");
 
-    const dataStream = stream.toDataStream();
-    dataStream.pipeThrough(rootStream, {
-      preventClose: true,
-    });
+    } catch (error: any) {
+      console.error(" Error in Claude or credit logic:", error);
+
+      const writer = rootStream.writable.getWriter();
+
+      const message = error?.message?.includes("No credits")
+        ? " You're out of credits. Please upgrade your plan."
+        : " Something went wrong. Please try again.";
+
+      writer.write(new TextEncoder().encode(message));
+      writer.close();
+    }
   }
 
   runAgent(message.content);
@@ -149,3 +134,5 @@ export async function GET(req: Request) {
     })
   );
 }
+
+

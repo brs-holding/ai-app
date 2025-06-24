@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -55,6 +56,8 @@ export default function RootLayout({
             <StackTheme>{children}</StackTheme>
           </StackProvider>
         </ThemeProvider>
+        {/* <p className="text-xs text-red-500 text-center">Layout loaded ✅</p> */}
+
       </body>
     </html>
   );
