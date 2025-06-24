@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     viewTransition: true,
   },
   devIndicators: false,
+  productionBrowserSourceMaps: false,  
 };
 
 export default nextConfig;
