@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
-    viewTransition: true,
+    viewTransition: false,
   },
   devIndicators: false,
   productionBrowserSourceMaps: false,  
