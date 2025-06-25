@@ -7,6 +7,9 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
+import { integer } from "drizzle-orm/pg-core";
+
+
 import type { Message } from "ai";
 
 export const appsTable = pgTable("apps", {
@@ -53,4 +56,14 @@ export const appDeployments = pgTable("app_deployments", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   deploymentId: text("deployment_id").notNull(),
   commit: text("commit").notNull(), // sha of the commit
+});
+
+export const planEnum = pgEnum("plan_type", ["free", "pro", "team"]);
+
+export const usersTable = pgTable("users", {
+  id: text("id").primaryKey(), // This matches the user ID from Stack Auth
+  plan: planEnum("plan").notNull().default("free"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  creditsRemaining: integer("credits_remaining").notNull().default(5),
+  lastCreditReset: timestamp("last_credit_reset").notNull().defaultNow(),
 });

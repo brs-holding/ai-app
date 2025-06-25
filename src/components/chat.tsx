@@ -19,8 +19,13 @@ export default function Chat(props: {
     useChat({
       initialMessages: props.initialMessages,
       generateId: () => {
-        return "cs-" + crypto.randomUUID();
+        if (typeof crypto?.randomUUID === "function") {
+          return "cs-" + crypto.randomUUID();
+        }
+        // fallback UUID polyfill for older environments
+        return "cs-" + Math.random().toString(36).substring(2) + Date.now();
       },
+
       sendExtraMessageFields: true,
       headers: {
         "Adorable-App-Id": props.appId,
